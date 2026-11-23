@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176b55">
+  <title>AJ.AR Marketing — Dairy Manager</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><p class="eyebrow">AJ.AR MARKETING</p><h1>Dairy Manager</h1></div>
+    <button id="installBtn" class="button button-light hidden" type="button">Install app</button>
+  </header>
+  <nav class="tabs" aria-label="Main navigation">
+    <button class="tab active" data-view="entry">Daily entry</button>
+    <button class="tab" data-view="rates">Rates & products</button>
+    <button class="tab" data-view="stock">Stock & suppliers</button>
+    <button class="tab" data-view="records">Records</button>
+  </nav>
+  <main>
+    <section id="entryView" class="view">
+      <div class="section-heading"><div><p class="eyebrow">ROUTE / SALESMAN ACCOUNT</p><h2>Daily entry</h2></div><div class="inline-fields"><label>Date<input id="entryDate" type="date"></label><label>Salesman<select id="entrySalesman"></select></label></div></div>
+      <div class="notice"><strong>Entry rule:</strong> quantity is entered in the same packet/unit count as your sheet. Amount = quantity × rate. 500 ml milk/curd equivalence is shown separately as 2 packets = 1 litre/kg; the entered quantity is not silently converted.</div>
+      <div class="card table-card"><div class="table-scroll"><table><thead><tr><th>Product</th><th>Qty / packets</th><th>Rate (₹)</th><th>Amount (₹)</th><th>Equivalent</th></tr></thead><tbody id="entryRows"></tbody></table></div><div class="total-row"><span>Product total</span><strong id="productTotal">₹0.00</strong></div></div>
+      <div class="card"><h3>Daily settlement</h3><div class="form-grid settlement-grid">
+        <label>Extra / adjustment (₹)<input id="extra" type="number" step="0.01" value="0"></label>
+        <label>Return / retren (₹)<input id="returnAmount" type="number" step="0.01" value="0"></label>
+        <label>Previous due / old balance (₹)<input id="oldDue" type="number" step="0.01" value="0"></label>
+        <label>Cash received (₹)<input id="cash" type="number" step="0.01" value="0"></label>
+        <label>Coins (₹)<input id="coins" type="number" step="0.01" value="0"></label>
+        <label>Notes<textarea id="notes" rows="2" placeholder="Optional"></textarea></label>
+      </div><div class="summary-grid"><div><span>Net amount due</span><strong id="netDue">₹0.00</strong></div><div><span>Remaining after cash/coins</span><strong id="balanceDue">₹0.00</strong></div></div>
+        <div class="actions"><button id="saveEntry" class="button" type="button">Save daily record</button><button id="clearEntry" class="button button-secondary" type="button">Clear quantities</button></div>
+      </div>
+    </section>
+
+    <section id="ratesView" class="view hidden">
+      <div class="section-heading"><div><p class="eyebrow">EDITABLE, WITH CHANGE HISTORY</p><h2>Rates & products</h2></div><button id="addProduct" class="button" type="button">Add product</button></div>
+      <div class="notice">Edit a rate for a specific salesman. New rates apply to new entries only; saved historical records keep their original quantities, rates and amounts. Missing salesman/product prices use Sohel's rate when available, otherwise ₹0 until you edit it.</div>
+      <div class="card table-card"><div class="table-scroll"><table><thead><tr><th>Product</th><th>Pack</th><th>Salesman</th><th>Rate (₹)</th><th>Default / source</th><th></th></tr></thead><tbody id="ratesRows"></tbody></table></div></div>
+      <div class="card"><h3>Rate change history</h3><div id="rateHistory" class="history-list"></div></div>
+    </section>
+
+    <section id="stockView" class="view hidden">
+      <div class="section-heading"><div><p class="eyebrow">PURCHASES & AVAILABLE STOCK</p><h2>Stock & suppliers</h2></div></div>
+      <div class="card"><h3>Record stock received</h3><form id="stockForm" class="form-grid">
+        <label>Date<input id="stockDate" type="date" required></label><label>Supplier<select id="stockSupplier"></select></label>
+        <label>Supplier name (if other)<input id="otherSupplier" placeholder="Optional"></label><label>Product<select id="stockProduct"></select></label>
+        <label>Quantity / packets<input id="stockQty" type="number" min="0.01" step="0.01" required></label><label>Purchase rate (₹)<input id="purchaseRate" type="number" min="0" step="0.01" value="0"></label>
+        <div class="form-actions"><button class="button" type="submit">Save stock receipt</button></div>
+      </form></div>
+      <div class="card table-card"><h3>Current stock by product</h3><div class="table-scroll"><table><thead><tr><th>Product</th><th>Received</th><th>Allocated / sold</th><th>Available</th><th>Unit</th></tr></thead><tbody id="stockRows"></tbody></table></div></div>
+    </section>
+
+    <section id="recordsView" class="view hidden">
+      <div class="section-heading"><div><p class="eyebrow">SAVED DAILY SHEETS</p><h2>Records</h2></div><button id="exportCsv" class="button button-secondary" type="button">Export CSV</button></div>
+      <div class="card"><div class="form-grid filter-grid"><label>Filter by date<input id="filterDate" type="date"></label><label>Filter by salesman<select id="filterSalesman"></select></label></div><div id="recordsList" class="records-list"></div></div>
+      <div class="card"><h3>Salesman list</h3><p class="muted">The photos clearly identified 7 names. Six remaining slots are placeholders; rename them when confirmed. POINT is kept as shown in the photo until you confirm whether it is a salesman or location.</p><div id="salesmanList" class="salesman-list"></div></div>
+    </section>
+  </main>
+  <footer>Saved on this device. Use Export CSV for a backup. This first version does not sync data between devices yet.</footer>
+  <dialog id="productDialog"><form method="dialog" id="productForm"><h2>Add product</h2><label>Product name<input id="newProductName" required maxlength="60"></label><label>Pack size / description<input id="newProductPack" required maxlength="40" placeholder="e.g. 500 ml"></label><label>Category<select id="newProductCategory"><option value="milk">Milk</option><option value="curd">Curd</option><option value="other">Other</option></select></label><label>Equivalent per packet<input id="newProductEquivalent" type="number" min="0" step="0.001" value="0"></label><p class="muted">For 500 ml milk set 0.5 litres/packet; for 500 ml curd set 0.5 kg/packet. Equivalent is informational only.</p><div class="actions"><button class="button" value="save">Add product</button><button class="button button-secondary" value="cancel">Cancel</button></div></form></dialog>
+  <script src="app.js"></script>
+</body>
+</html>
